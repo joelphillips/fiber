@@ -1,0 +1,3 @@
+Fast Integration for Boundary Element Routines
+
+A library of low-level quadrature and kernel and shape function evaluation routines for the approximation of boundary integral operators.
