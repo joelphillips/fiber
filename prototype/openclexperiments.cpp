@@ -30,7 +30,7 @@ void testopencl(){
 	cl_int err;
 	cl::vector< cl::Platform > platformList;
 	cl::Platform::get(&platformList);
-	std::cout<<platformList.size()<<std::endl;
+	std::cout<<"Number of platforms: "<<platformList.size()<<std::endl;
     std::string platformVendor;
     for(int i = 0; i < platformList.size(); i++){
     	platformList[i].getInfo((cl_platform_info)CL_PLATFORM_VENDOR, &platformVendor);
@@ -40,7 +40,7 @@ void testopencl(){
             {CL_CONTEXT_PLATFORM, (cl_context_properties)(platformList[0])(), 0};
 
 	cl::Context context(
-	   CL_DEVICE_TYPE_CPU,
+	   CL_DEVICE_TYPE_ALL,
 	   cprops,
 	   NULL,
 	   NULL,
@@ -58,4 +58,48 @@ void testopencl(){
 		&err);
 	checkErr(err, "Buffer::Buffer()");
 
+	cl::vector<cl::Device> devices;
+	devices = context.getInfo<CL_CONTEXT_DEVICES>();
+	std::cout<<"Number of devices: "<<devices.size()<<std::endl;
+	std::string devicetype;
+	for(int i = 0; i < devices.size(); i++){
+		devices[i].getInfo(CL_DEVICE_NAME, &devicetype);
+		std::cout<<devicetype<<std::endl;
+	}
+
+	std::ifstream file("prototype/lesson1_kernels.cl");
+	checkErr(file.is_open() ? CL_SUCCESS:-1, "lesson1_kernel.cl");
+	std::string prog(std::istreambuf_iterator<char>(file),
+						(std::istreambuf_iterator<char>()));
+
+	cl::Program::Sources source(1, std::make_pair(prog.c_str(), prog.length()+1));
+	cl::Program program(context, source);
+	err = program.build(devices,""); checkErr(err, "Program::build()");
+
+    cl::Kernel kernel(program, "hello", &err);
+    checkErr(err, "Kernel::Kernel()");
+    err = kernel.setArg(0, outCL);
+    checkErr(err, "Kernel::setArg()");
+
+    cl::CommandQueue queue(context, devices[0], 0, &err);
+	checkErr(err, "CommandQueue::CommandQueue()");
+	cl::Event event;
+	err = queue.enqueueNDRangeKernel(
+		kernel,
+		cl::NullRange,
+		cl::NDRange(hw.length()+1),
+		cl::NDRange(1, 1),
+		NULL,
+		&event);
+	checkErr(err, "CommandQueue::enqueueNDRangeKernel()");
+
+    event.wait();
+    err = queue.enqueueReadBuffer(
+        outCL,
+        CL_TRUE,
+        0,
+        hw.length()+1,
+        outH);
+    checkErr(err, "ComamndQueue::enqueueReadBuffer()");
+    std::cout << outH;
 }
