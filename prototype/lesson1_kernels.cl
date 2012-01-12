@@ -1,9 +1,25 @@
-#pragma OPENCL EXTENSION cl_khr_byte_addressable_store : enable
+#if defined(cl_khr_fp64)  // Khronos extension available?
+#pragma OPENCL EXTENSION cl_khr_fp64 : enable
+#elif defined(cl_amd_fp64)  // AMD extension available?
+#pragma OPENCL EXTENSION cl_amd_fp64 : enable
+#endif
 
-__constant char hw[] = "Hello World\n";
+#pragma OPENCL EXTENSION cl_amd_fp64 : enable
 
-__kernel void hello(__global char * out)
-{
-    size_t tid = get_global_id(0);
-    out[tid] = hw[tid];
+//__kernel void hello(__global char * in, __global char * out)
+//{
+//    size_t tid = get_global_id(0);
+//    out[tid] = hw[tid] + in[tid];
+//}
+//
+//
+//__kernel void hello( __global char * out)
+//{
+//    size_t tid = get_global_id(0);
+//    out[tid] = hw[tid];
+//}
+
+__kernel void sum(__global float2 * v1, __global float2 * v2, __global float2 * r){
+	size_t tid = get_global_id(0);
+	r[tid] = 4.0;//v1[tid] + v2[tid];
 }

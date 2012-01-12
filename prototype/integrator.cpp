@@ -11,41 +11,9 @@
 #include <iostream>
 using namespace std;
 
-
-
-double polyeval(const double* coeffs, double x, double y, int order){
-	double val = 0;
-	double yy = 1;
-	for(int i = 0; i <= order; i++){
-		double xx = 1;
-		for(int j = 0; j <=order - i; j++ ){
-			val += (*coeffs++) * xx * yy;
-			xx*=x;
-		}
-		yy *= y;
-	}
-	return val;
-}
-
-void affinebarycentricmap(const Point3& ref,
-						const Point3& v1,
-						const Point3& v2,
-						const Point3& v3,
-						Point3 & out){
-	out.x = ref.x * v1.x + ref.y * v2.x + ref.z * v3.x;
-	out.y = ref.x * v1.y + ref.y * v2.y + ref.z * v3.y;
-	out.z = ref.x * v1.z + ref.y * v2.z + ref.z * v3.z;
-}
-
-double laplacekernel(const Point3& a, const Point3& b){
-	double dx = a.x - b.x;
-	double dy = a.y - b.y;
-	double dz = a.z - b.z;
-	return pow(dx*dx + dy * dy + dz * dz, -1.0/2);
-}
+#include "mapsandfns.cl"
 
 Polynomial::Polynomial(const std::vector<double>& coeffs, int order):_coeffs(coeffs),_order(order){
-
 	assert(coeffs.size() == ((order+1) * (order + 2)) / 2);
 }
 
@@ -54,11 +22,25 @@ Polynomial::evaluate(const Point3 & p) const {
 	return polyeval(&_coeffs.front(), p.x, p.y, _order);
 }
 
-AffineBarycentricMap::AffineBarycentricMap(const std::vector<Point3>& vertices):_vertices(vertices){}
+AffineBarycentricMap::AffineBarycentricMap(const std::vector<Point3>& vertices):_vertices(vertices){
+	const std::vector<Point3>& vs = vertices;
+	double ux,uy,uz,vx,vy,vz,nx,ny,nz;
+	ux = vs[1].x - vs[0].x;
+	uy = vs[1].y - vs[0].y;
+	uz = vs[1].z - vs[0].z;
+	vx = vs[2].x - vs[0].x;
+	vy = vs[2].y - vs[0].y;
+	vz = vs[2].z - vs[0].z;
+	nx = uy*vz - uz*vy;
+	ny = uz*vx - ux*vz;
+	nz = ux*vy - uy*vx;
+	_detjac = sqrt(nx*nx + ny*ny + nz*nz);
+}
 
 void
 AffineBarycentricMap::map(const Point3 & refpoint, Point3& out) const{
-	affinebarycentricmap(refpoint, _vertices[0], _vertices[1], _vertices[2], out);
+	Point3Triple vs = {_vertices[0], _vertices[1], _vertices[2]};
+	affinebarycentricmap(refpoint, vs, out);
 }
 
 double

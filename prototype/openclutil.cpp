@@ -38,7 +38,7 @@ ContextWrapper::ContextWrapper(){
 	for(int i = 0; i < _devices.size(); i++){
 		_devices[i].getInfo(CL_DEVICE_NAME, &deviceinfo);
 		std::cout<<deviceinfo<<std::endl;
-		_devices[i].getInfo(CL_DEVICE_AVAILABLE, &deviceinfo);
+		_devices[i].getInfo(CL_DEVICE_EXTENSIONS, &deviceinfo);
 		std::cout<<deviceinfo<<std::endl;
 	}
 

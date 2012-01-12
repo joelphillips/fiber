@@ -13,6 +13,7 @@
 #include <iostream>
 #include <cmath>
 
+
 using namespace std;
 using namespace boost::assign;
 
@@ -81,9 +82,53 @@ BOOST_AUTO_TEST_CASE(test_map){
 	BOOST_CHECK_CLOSE(p.z, 22.0/3, 1E-12);
 }
 
+BOOST_AUTO_TEST_CASE(test_detjac){
+	Point3 p1 = {0,0,1};
+	Point3 p2 = {1,0,0};
+	Point3 p3 = {0,1,0};
+	std::vector<Point3> v;
+	v+=p1,p2,p3;
+	AffineBarycentricMap map(v);
+	BOOST_CHECK_CLOSE(map.detjac(p1), sqrt(3), 1E-12);
+}
+
 BOOST_AUTO_TEST_CASE(test_kernel){
 	LaplaceKernel kernel;
 	Point3 p1 = {1,2,4};
 	Point3 p2 = {3,0,5};
 	BOOST_CHECK_CLOSE(kernel.evaluate(p1,p2), 1.0/3, 1E-12);
+}
+
+BOOST_AUTO_TEST_CASE(test_integration){
+	std::vector<double> c(1,1);
+	Polynomial f1(c, 0); // 1
+	vector<Polynomial*> vp(2, &f1);
+
+	Point3 rpc = {1.0/3,1.0/3,1.0/3};
+	typedef pair<Point3,Point3> pP3;
+
+	// the world's stupidest quadrature? ...
+	vector<pP3> quadpoints;
+	quadpoints+=pP3(rpc,rpc),pP3(rpc,rpc);
+	vector<double> quadweights;
+	quadweights+=1.0/8, 1.0/8;
+
+	Point3 p0 = {0,0,0};
+	Point3 p1 = {1,0,0};
+	Point3 p2 = {0,1,0};
+	Point3 p3 = {0,0,1};
+	vector<Point3> v1;
+	vector<Point3> v2;
+	v1+=p0,p1,p2;
+	v2+=p0,p2,p3;
+	AffineBarycentricMap map1(v1);
+	AffineBarycentricMap map2(v2);
+	vector<AffineBarycentricMap*> vm1(1,&map1);
+	vector<AffineBarycentricMap*> vm2(2,&map2);
+	vector<double> out;
+	integrate(quadpoints, quadweights, vm1, vm2, vp, vp, LaplaceKernel(), out);
+	BOOST_CHECK_EQUAL(out.size(), 8);
+	for(int i = 0; i < out.size(); i++){
+		BOOST_CHECK_CLOSE(out[i], 3 / (sqrt(2)*4) , 1E-12);
+	}
 }

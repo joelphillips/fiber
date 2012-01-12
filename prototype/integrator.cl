@@ -1,50 +1,19 @@
 /*
- * integrator.h
+ * integrator.cl
  *
- *  Created on: Jan 11, 2012
+ *  Created on: Jan 12, 2012
  *      Author: joel
  */
 
-#ifndef INTEGRATOR_H_
-#define INTEGRATOR_H_
 
-#include <vector>
-#include <utility>
-#include <assert.h>
-
-#include "commontypes.hpp"
-
-class Polynomial{
-private:
-	std::vector<double> _coeffs;
-	int _order;
-public:
-	Polynomial(const std::vector<double>& coeffs, int order);
-	double evaluate(const Point3 & p) const;
-};
-
-class AffineBarycentricMap{
-private:
-	std::vector<Point3> _vertices;
-	double _detjac;
-public:
-	AffineBarycentricMap(const std::vector<Point3>& vertices);
-	void map(const Point3 & refpoint, Point3& out) const;
-	double detjac(const Point3 & refpoint)const {return _detjac;};
-};
-
-class LaplaceKernel{
-public:
-	double evaluate(const Point3& p1, Point3& p2) const;
-};
-
-
-template<typename MAP1, typename MAP2, typename FN1, typename FN2, typename KERNEL>
-void integrate(const std::vector<std::pair<Point3, Point3> >& refpoints,
-			const std::vector<double>& weights,
-			const std::vector<MAP1*> map1,
-			const std::vector<MAP2*> map2,
-			const std::vector<FN1*>& fns1,
+void integrate(__global Point3Pair * refpoints,
+			__global double * weights,
+			uint npoints,
+			__global Point3Triple * map1data,
+			__global Point3Triple * map2data,
+			__global double * fn1coeffs,
+			uint fn1order,
+			__global
 			const std::vector<FN2*>& fns2,
 			const KERNEL& kernel,
 			std::vector<double>& out){
@@ -86,4 +55,3 @@ void integrate(const std::vector<std::pair<Point3, Point3> >& refpoints,
 }
 
 
-#endif /* INTEGRATOR_H_ */

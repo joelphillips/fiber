@@ -14,6 +14,7 @@
 #include <iostream>
 #include <string>
 #include <iterator>
+#include <unistd.h>
 #include "openclutil.h"
 inline void
 checkErr(cl_int err, const char * name)
@@ -30,37 +31,58 @@ void testopencl(){
 	try{
 		ContextWrapper cw;
 
-		char * outH = new char[hw.length()+1];
+		static const int N = 10;
 
-		cl::Buffer outCL(
+		double * v1 = new double[N];
+		double * v2 = new double[N];
+		for(int i = 0; i < N; i++){
+			v1[i] = 3;
+			v2[i] = i;
+		}
+
+		cl::Buffer v1CL(cw.getContext(),
+				CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+				N * sizeof(double),
+				v1);
+
+		cl::Buffer v2CL(cw.getContext(),
+				CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+				N * sizeof(double),
+				v2);
+
+		cl::Buffer rCL(
 			cw.getContext(),
-			CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
-			hw.length()+1,
-			outH);
+			CL_MEM_WRITE_ONLY,
+			N*sizeof(double));
 
 		cl::Program program = cw.getProgramFromFiles(std::vector<std::string>(1, "prototype/lesson1_kernels.cl"));
 
-		cl::Kernel kernel(program, "hello");
-		kernel.setArg(0, outCL);
+		cl::Kernel kernel(program, "sum");
+//		kernel.setArg(0, inCL);
+		kernel.setArg(0, v1CL);
+		kernel.setArg(1, v2CL);
+		kernel.setArg(2, rCL);
 
 		cl::CommandQueue queue = cw.getQueue();
 		cl::Event event;
 		queue.enqueueNDRangeKernel(
 			kernel,
 			cl::NullRange,
-			cl::NDRange(hw.length()+1),
+			cl::NDRange(N),
 			cl::NDRange(1, 1),
 			NULL,
 			&event);
 
 		event.wait();
-		queue.enqueueReadBuffer(
-			outCL,
-			CL_TRUE,
-			0,
-			hw.length()+1,
-			outH);
-		std::cout << outH;
+
+		double * r = new double[N];
+
+		queue.enqueueReadBuffer(rCL,CL_TRUE,0,N*sizeof(double),r);
+
+		std::cerr <<" And the output is ... "<<std::endl;
+		for(int i = 0; i < N; i++){
+			std::cerr<<r[i]<<" ";
+		}
 	}
 	catch (cl::Error err) {
 		std::cerr << err.what() << "(" << err.err() << ")" << std::endl;
