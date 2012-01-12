@@ -11,10 +11,10 @@
 
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
 #include <iostream>
+#include <cmath>
 
 using namespace std;
 using namespace boost::assign;
-
 
 BOOST_AUTO_TEST_CASE(test_that_I_can_test){
 	BOOST_CHECK_EQUAL(3,3);
@@ -49,4 +49,41 @@ BOOST_AUTO_TEST_CASE(test_polynomial){
 	BOOST_CHECK_CLOSE(f1.evaluate(pc),1.0/3,1E-12);
 	BOOST_CHECK_CLOSE(f2.evaluate(pc),1.0/3,1E-12);
 	BOOST_CHECK_CLOSE(f3.evaluate(pc),1.0/3,1E-12);
+}
+
+BOOST_AUTO_TEST_CASE(test_map){
+	Point3 p1 = {12,13,14};
+	Point3 p2 = {1,2,3};
+	Point3 p3 = {20,0,5};
+	std::vector<Point3> v;
+	v+=p1,p2,p3;
+	AffineBarycentricMap map(v);
+	Point3 rp1 = {1,0,0};
+	Point3 rp2 = {0,1,0};
+	Point3 rp3 = {0,0,1};
+	Point3 rpc = {1.0/3,1.0/3,1.0/3};
+	Point3 p;
+	map.map(rp1,p);
+	BOOST_CHECK_CLOSE(p.x, p1.x, 1E-12);
+	BOOST_CHECK_CLOSE(p.y, p1.y, 1E-12);
+	BOOST_CHECK_CLOSE(p.y, p1.y, 1E-12);
+	map.map(rp2,p);
+	BOOST_CHECK_CLOSE(p.x, p2.x, 1E-12);
+	BOOST_CHECK_CLOSE(p.y, p2.y, 1E-12);
+	BOOST_CHECK_CLOSE(p.z, p2.z, 1E-12);
+	map.map(rp3,p);
+	BOOST_CHECK_CLOSE(p.x, p3.x, 1E-12);
+	BOOST_CHECK_CLOSE(p.y, p3.y, 1E-12);
+	BOOST_CHECK_CLOSE(p.z, p3.z, 1E-12);
+	map.map(rpc,p);
+	BOOST_CHECK_CLOSE(p.x, 11, 1E-12);
+	BOOST_CHECK_CLOSE(p.y, 5, 1E-12);
+	BOOST_CHECK_CLOSE(p.z, 22.0/3, 1E-12);
+}
+
+BOOST_AUTO_TEST_CASE(test_kernel){
+	LaplaceKernel kernel;
+	Point3 p1 = {1,2,4};
+	Point3 p2 = {3,0,5};
+	BOOST_CHECK_CLOSE(kernel.evaluate(p1,p2), 1.0/3, 1E-12);
 }

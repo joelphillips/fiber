@@ -41,7 +41,7 @@ double laplacekernel(const Point3& a, const Point3& b){
 	double dx = a.x - b.x;
 	double dy = a.y - b.y;
 	double dz = a.z - b.z;
-	return pow(dx*dx + dy * dy + dz * dz, -2);
+	return pow(dx*dx + dy * dy + dz * dz, -1.0/2);
 }
 
 Polynomial::Polynomial(const std::vector<double>& coeffs, int order):_coeffs(coeffs),_order(order){
