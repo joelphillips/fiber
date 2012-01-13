@@ -13,12 +13,15 @@ using namespace std;
 
 #include "mapsandfns.cl"
 
-Polynomial::Polynomial(const std::vector<double>& coeffs, int order):_coeffs(coeffs),_order(order){
+Polynomial::Polynomial(const std::vector<FLOAT>& coeffs, int order):_coeffs(coeffs),_order(order){
 	assert(coeffs.size() == ((order+1) * (order + 2)) / 2);
 }
 
 double
 Polynomial::evaluate(const Point3 & p) const {
+	PolyData data;
+	data.order = _order;
+
 	return polyeval(&_coeffs.front(), p.x, p.y, _order);
 }
 

@@ -17,6 +17,8 @@
 using namespace std;
 using namespace boost::assign;
 
+#define TOL 1E-4
+
 BOOST_AUTO_TEST_CASE(test_that_I_can_test){
 	BOOST_CHECK_EQUAL(3,3);
 	BOOST_CHECK(true);
@@ -27,7 +29,7 @@ BOOST_AUTO_TEST_CASE(test_prototype){
 }
 
 BOOST_AUTO_TEST_CASE(test_polynomial){
-	std::vector<double> c1,c2,c3;
+	std::vector<FLOAT> c1,c2,c3;
 	c1+=1.0,-1.0,-1.0;
 	c2+=0.0, 1.0, 0.0;
 	c3+=0.0, 0.0, 1.0;
@@ -47,9 +49,9 @@ BOOST_AUTO_TEST_CASE(test_polynomial){
 	BOOST_CHECK_EQUAL(f3.evaluate(p1),0);
 	BOOST_CHECK_EQUAL(f3.evaluate(p2),0);
 	BOOST_CHECK_EQUAL(f3.evaluate(p3),1);
-	BOOST_CHECK_CLOSE(f1.evaluate(pc),1.0/3,1E-12);
-	BOOST_CHECK_CLOSE(f2.evaluate(pc),1.0/3,1E-12);
-	BOOST_CHECK_CLOSE(f3.evaluate(pc),1.0/3,1E-12);
+	BOOST_CHECK_CLOSE(f1.evaluate(pc),1.0/3,TOL);
+	BOOST_CHECK_CLOSE(f2.evaluate(pc),1.0/3,TOL);
+	BOOST_CHECK_CLOSE(f3.evaluate(pc),1.0/3,TOL);
 }
 
 BOOST_AUTO_TEST_CASE(test_map){
@@ -65,21 +67,21 @@ BOOST_AUTO_TEST_CASE(test_map){
 	Point3 rpc = {1.0/3,1.0/3,1.0/3};
 	Point3 p;
 	map.map(rp1,p);
-	BOOST_CHECK_CLOSE(p.x, p1.x, 1E-12);
-	BOOST_CHECK_CLOSE(p.y, p1.y, 1E-12);
-	BOOST_CHECK_CLOSE(p.y, p1.y, 1E-12);
+	BOOST_CHECK_CLOSE(p.x, p1.x, TOL);
+	BOOST_CHECK_CLOSE(p.y, p1.y, TOL);
+	BOOST_CHECK_CLOSE(p.y, p1.y, TOL);
 	map.map(rp2,p);
-	BOOST_CHECK_CLOSE(p.x, p2.x, 1E-12);
-	BOOST_CHECK_CLOSE(p.y, p2.y, 1E-12);
-	BOOST_CHECK_CLOSE(p.z, p2.z, 1E-12);
+	BOOST_CHECK_CLOSE(p.x, p2.x, TOL);
+	BOOST_CHECK_CLOSE(p.y, p2.y, TOL);
+	BOOST_CHECK_CLOSE(p.z, p2.z, TOL);
 	map.map(rp3,p);
-	BOOST_CHECK_CLOSE(p.x, p3.x, 1E-12);
-	BOOST_CHECK_CLOSE(p.y, p3.y, 1E-12);
-	BOOST_CHECK_CLOSE(p.z, p3.z, 1E-12);
+	BOOST_CHECK_CLOSE(p.x, p3.x, TOL);
+	BOOST_CHECK_CLOSE(p.y, p3.y, TOL);
+	BOOST_CHECK_CLOSE(p.z, p3.z, TOL);
 	map.map(rpc,p);
-	BOOST_CHECK_CLOSE(p.x, 11, 1E-12);
-	BOOST_CHECK_CLOSE(p.y, 5, 1E-12);
-	BOOST_CHECK_CLOSE(p.z, 22.0/3, 1E-12);
+	BOOST_CHECK_CLOSE(p.x, 11, TOL);
+	BOOST_CHECK_CLOSE(p.y, 5, TOL);
+	BOOST_CHECK_CLOSE(p.z, 22.0/3, TOL);
 }
 
 BOOST_AUTO_TEST_CASE(test_detjac){
@@ -89,18 +91,18 @@ BOOST_AUTO_TEST_CASE(test_detjac){
 	std::vector<Point3> v;
 	v+=p1,p2,p3;
 	AffineBarycentricMap map(v);
-	BOOST_CHECK_CLOSE(map.detjac(p1), sqrt(3), 1E-12);
+	BOOST_CHECK_CLOSE(map.detjac(p1), sqrt(3), TOL);
 }
 
 BOOST_AUTO_TEST_CASE(test_kernel){
 	LaplaceKernel kernel;
 	Point3 p1 = {1,2,4};
 	Point3 p2 = {3,0,5};
-	BOOST_CHECK_CLOSE(kernel.evaluate(p1,p2), 1.0/3, 1E-12);
+	BOOST_CHECK_CLOSE(kernel.evaluate(p1,p2), 1.0/3, TOL);
 }
 
 BOOST_AUTO_TEST_CASE(test_integration){
-	std::vector<double> c(1,1);
+	std::vector<FLOAT> c(1,1);
 	Polynomial f1(c, 0); // 1
 	vector<Polynomial*> vp(2, &f1);
 
@@ -110,7 +112,7 @@ BOOST_AUTO_TEST_CASE(test_integration){
 	// the world's stupidest quadrature? ...
 	vector<pP3> quadpoints;
 	quadpoints+=pP3(rpc,rpc),pP3(rpc,rpc);
-	vector<double> quadweights;
+	vector<FLOAT> quadweights;
 	quadweights+=1.0/8, 1.0/8;
 
 	Point3 p0 = {0,0,0};
@@ -125,10 +127,10 @@ BOOST_AUTO_TEST_CASE(test_integration){
 	AffineBarycentricMap map2(v2);
 	vector<AffineBarycentricMap*> vm1(1,&map1);
 	vector<AffineBarycentricMap*> vm2(2,&map2);
-	vector<double> out;
+	vector<FLOAT> out;
 	integrate(quadpoints, quadweights, vm1, vm2, vp, vp, LaplaceKernel(), out);
 	BOOST_CHECK_EQUAL(out.size(), 8);
 	for(int i = 0; i < out.size(); i++){
-		BOOST_CHECK_CLOSE(out[i], 3 / (sqrt(2)*4) , 1E-12);
+		BOOST_CHECK_CLOSE(out[i], 3 / (sqrt(2)*4) , TOL);
 	}
 }

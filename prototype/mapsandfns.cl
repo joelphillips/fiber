@@ -6,13 +6,13 @@
  */
 
 
-double polyeval(const double* coeffs, double x, double y, int order){
-	double val = 0;
-	double yy = 1;
-	for(int i = 0; i <= order; i++){
-		double xx = 1;
-		for(int j = 0; j <=order - i; j++ ){
-			val += (*coeffs++) * xx * yy;
+double polyeval(const PolyData& data, FLOAT x, FLOAT y){
+	FLOAT val = 0;
+	FLOAT yy = 1;
+	for(int i = 0; i <= data.order; i++){
+		FLOAT xx = 1;
+		for(int j = 0; j <=data.order - i; j++ ){
+			val += (*data.coeffs++) * xx * yy;
 			xx*=x;
 		}
 		yy *= y;
@@ -28,9 +28,9 @@ void affinebarycentricmap(const Point3& ref,
 	out.z = ref.x * vs.p1.z + ref.y * vs.p2.z + ref.z * vs.p3.z;
 }
 
-double laplacekernel(const Point3& a, const Point3& b){
-	double dx = a.x - b.x;
-	double dy = a.y - b.y;
-	double dz = a.z - b.z;
-	return pow(dx*dx + dy * dy + dz * dz, -1.0/2);
+FLOAT laplacekernel(const Point3& a, const Point3& b){
+	FLOAT dx = a.x - b.x;
+	FLOAT dy = a.y - b.y;
+	FLOAT dz = a.z - b.z;
+	return pow(dx*dx + dy * dy + dz * dz, -1.0f/2);
 }

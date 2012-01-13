@@ -11,7 +11,7 @@
 #include "integrator.hpp"
 
 void integrategpu(const std::vector<std::pair<Point3, Point3> >& refpoints,
-			const std::vector<double>& weights,
+			const std::vector<FLOAT>& weights,
 			const std::vector<AffineBarycentricMap*> map1,
 			const std::vector<AffineBarycentricMap*> map2,
 			const std::vector<Polynomial*>& fns1,

@@ -16,10 +16,10 @@
 
 class Polynomial{
 private:
-	std::vector<double> _coeffs;
+	std::vector<FLOAT> _coeffs;
 	int _order;
 public:
-	Polynomial(const std::vector<double>& coeffs, int order);
+	Polynomial(const std::vector<FLOAT>& coeffs, int order);
 	double evaluate(const Point3 & p) const;
 };
 
@@ -41,13 +41,13 @@ public:
 
 template<typename MAP1, typename MAP2, typename FN1, typename FN2, typename KERNEL>
 void integrate(const std::vector<std::pair<Point3, Point3> >& refpoints,
-			const std::vector<double>& weights,
+			const std::vector<FLOAT>& weights,
 			const std::vector<MAP1*> map1,
 			const std::vector<MAP2*> map2,
 			const std::vector<FN1*>& fns1,
 			const std::vector<FN2*>& fns2,
 			const KERNEL& kernel,
-			std::vector<double>& out){
+			std::vector<FLOAT>& out){
 	assert(refpoints.size() == weights.size());
 	int np = refpoints.size();
 	int nf1 = fns1.size();
