@@ -5,14 +5,19 @@
  *      Author: joel
  */
 
-
+/**
+ * This is a terrible way to evaluate a polynomial.  Firstly, it's unstable.  Secondly,
+ * it's a lot better to use something like the Bonnet recursion formula and evaluate
+ * all the polynomials in a basis at the same time.
+ */
 double polyeval(const PolyData& data, FLOAT x, FLOAT y){
 	FLOAT val = 0;
 	FLOAT yy = 1;
+	const FLOAT * c = data.coeffs;
 	for(int i = 0; i <= data.order; i++){
 		FLOAT xx = 1;
 		for(int j = 0; j <=data.order - i; j++ ){
-			val += (*data.coeffs++) * xx * yy;
+			val += (*c++) * xx * yy;
 			xx*=x;
 		}
 		yy *= y;

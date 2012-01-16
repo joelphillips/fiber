@@ -7,31 +7,38 @@
 
 
 void integrate(__global Point3Pair * refpoints,
-			__global double * weights,
-			uint npoints,
+			__global FLOAT * weights,
+			uint np,
 			__global Point3Triple * map1data,
+			uint nm1,
 			__global Point3Triple * map2data,
-			__global double * fn1coeffs,
-			uint fn1order,
-			__global
-			const std::vector<FN2*>& fns2,
-			const KERNEL& kernel,
-			std::vector<double>& out){
-	assert(refpoints.size() == weights.size());
+			uint nm2,
+			__global FNDATA * fn1coeffs,
+			unit nf1,
+			__global FNDATA * fn2coeffs,
+			unit nf2,
+			__global FLOAT* out
+			__local FLOAT* fnvals){
 	int np = refpoints.size();
-	int nf1 = fns1.size();
-	int nf2 = fns2.size();
-	int nm1 = map1.size();
-	int nm2 = map2.size();
-	out.resize(nf1 * nf2 * nm1 * nm2);
-	std::vector<double> fnvals(np*nf1*nf2);
-	for(int i = 0; i < np; i++){
-		for(int j = 0; j < nf1; j++){
-			for(int k = 0; k < nf2; k++){
-				fnvals[i *nf1*nf2 + j*nf2 +k] = fns1[j]->evaluate(refpoints[i].first)*fns2[k]->evaluate(refpoints[i].second);
-			}
-		}
+
+//	out.resize(nf1 * nf2 * nm1 * nm2);
+//	std::vector<double> fnvals(np*nf1*nf2);
+	size_t gid = get_global_id(0);
+	size_t lid = get_local_id(0);
+	size_t lsize = get_local_size(0);
+
+	size_t nfnpts = nf1 * nf2 * np;
+	for(size_t i = lid; i < nfnpts; i+=lsize){
+		size_t fn1id = i % nf1;
+		size_t fn2id = (i / nf1) % nf2;
+		size_t ptid = (i / (nf1 * nf2));
+		pt1 = refpoints[ptid]->first;
+		pt2 = refpoints[ptid]->second;
+		fnvals[i] = polyeval(fn1coeffs[fn1id], pt1.x, pt1.y) *
+				polyeval(fn2coeffs[fn2id], pt2.x, pt2.x);
 	}
+
+
 	for(int n1 = 0; n1 < nm1; n1++){
 		for(int n2 = 0; n2 < nm2; n2++){
 			int n = n1 *nm2 + n2;

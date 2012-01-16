@@ -16,8 +16,7 @@
 
 class Polynomial{
 private:
-	std::vector<FLOAT> _coeffs;
-	int _order;
+	PolyData _polydata;
 public:
 	Polynomial(const std::vector<FLOAT>& coeffs, int order);
 	double evaluate(const Point3 & p) const;

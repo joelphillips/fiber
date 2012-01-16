@@ -56,6 +56,7 @@ ContextWrapper::getProgramFromFiles(const std::vector<std::string>& filenames){
 						(std::istreambuf_iterator<char>()));
 		progs[i] = prog;
 		sources[i] = std::make_pair(prog.c_str(), prog.length()+1);
+		std::cout<<prog<<std::endl;
 	}
 
 	cl::Program program(_context, sources);

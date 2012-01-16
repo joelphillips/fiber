@@ -4,7 +4,7 @@
 #pragma OPENCL EXTENSION cl_amd_fp64 : enable
 #endif
 
-#pragma OPENCL EXTENSION cl_amd_fp64 : enable
+//#pragma OPENCL EXTENSION cl_amd_fp64 : enable
 
 //__kernel void hello(__global char * in, __global char * out)
 //{
@@ -19,7 +19,9 @@
 //    out[tid] = hw[tid];
 //}
 
+#define FLOAT float
+
 __kernel void sum(__global FLOAT * v1, __global FLOAT * v2, __global FLOAT * r){
 	size_t tid = get_global_id(0);
-	r[tid] = 4.0;//v1[tid] + v2[tid];
+	r[tid] = v1[tid] + v2[tid];
 }

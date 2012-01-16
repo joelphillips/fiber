@@ -13,16 +13,19 @@ using namespace std;
 
 #include "mapsandfns.cl"
 
-Polynomial::Polynomial(const std::vector<FLOAT>& coeffs, int order):_coeffs(coeffs),_order(order){
+Polynomial::Polynomial(const std::vector<FLOAT>& coeffs, int order){
 	assert(coeffs.size() == ((order+1) * (order + 2)) / 2);
+	assert(order <= MAXORDER);
+	_polydata.order = order;
+	int i = 0;
+	for(std::vector<FLOAT>::const_iterator it = coeffs.begin(); it !=coeffs.end(); it++){
+		_polydata.coeffs[i++] = *it;
+	}
 }
 
 double
 Polynomial::evaluate(const Point3 & p) const {
-	PolyData data;
-	data.order = _order;
-
-	return polyeval(&_coeffs.front(), p.x, p.y, _order);
+	return polyeval(_polydata, p.x, p.y);
 }
 
 AffineBarycentricMap::AffineBarycentricMap(const std::vector<Point3>& vertices):_vertices(vertices){

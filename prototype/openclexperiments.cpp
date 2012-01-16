@@ -16,6 +16,12 @@
 #include <iterator>
 #include <unistd.h>
 #include "openclutil.h"
+
+#include <boost/assign/std/vector.hpp> // for 'operator+=()'
+
+using namespace std;
+using namespace boost::assign;
+
 inline void
 checkErr(cl_int err, const char * name)
 {
@@ -27,14 +33,16 @@ checkErr(cl_int err, const char * name)
 
 const std::string hw("Hello World\n");
 
+#define FLOAT float
+
 void testopencl(){
 	try{
 		ContextWrapper cw;
 
 		static const int N = 10;
 
-		double * v1 = new double[N];
-		double * v2 = new double[N];
+		FLOAT * v1 = new FLOAT[N];
+		FLOAT * v2 = new FLOAT[N];
 		for(int i = 0; i < N; i++){
 			v1[i] = 3;
 			v2[i] = i;
@@ -42,20 +50,24 @@ void testopencl(){
 
 		cl::Buffer v1CL(cw.getContext(),
 				CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-				N * sizeof(double),
+				N * sizeof(FLOAT),
 				v1);
 
 		cl::Buffer v2CL(cw.getContext(),
 				CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-				N * sizeof(double),
+				N * sizeof(FLOAT),
 				v2);
 
 		cl::Buffer rCL(
 			cw.getContext(),
 			CL_MEM_WRITE_ONLY,
-			N*sizeof(double));
+			N*sizeof(FLOAT));
 
-		cl::Program program = cw.getProgramFromFiles(std::vector<std::string>(1, "prototype/lesson1_kernels.cl"));
+		vector<string> filenames;
+		filenames +=// "prototype/commontypes.hpp",
+					"prototype/lesson1_kernels.cl";
+
+		cl::Program program = cw.getProgramFromFiles(filenames);
 
 		cl::Kernel kernel(program, "sum");
 //		kernel.setArg(0, inCL);
@@ -75,9 +87,9 @@ void testopencl(){
 
 		event.wait();
 
-		double * r = new double[N];
+		FLOAT * r = new FLOAT[N];
 
-		queue.enqueueReadBuffer(rCL,CL_TRUE,0,N*sizeof(double),r);
+		queue.enqueueReadBuffer(rCL,CL_TRUE,0,N*sizeof(FLOAT),r);
 
 		std::cerr <<" And the output is ... "<<std::endl;
 		for(int i = 0; i < N; i++){
