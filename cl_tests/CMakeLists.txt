@@ -1,0 +1,38 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+project(integrate)
+
+#need to include FindOPENCL.cmake to
+SET( CMAKE_MODULE_PATH ${integrate_SOURCE_DIR}/config)
+
+message("CMake module path: ${CMAKE_MODULE_PATH}\n")
+
+FIND_PACKAGE (OPENCL)
+
+INCLUDE_DIRECTORIES(
+    ${OPENCL_INCLUDE_DIR}
+)
+
+message("include directories: \n")
+get_directory_property(includes INCLUDE_DIRECTORIES)
+message("${includes}\n")
+
+#provide the source path so we can open our .cl file at runtime
+#ADD_DEFINITIONS(-DCL_SOURCE_DIR="${integrate_SOURCE_DIR}")
+#build in debug mode
+ADD_DEFINITIONS(-g )
+
+#the source files we want to compile into the library
+set (LIBCXXFILES cll.cpp integrate.cpp util.cpp mesh.cpp quadrature.cpp)
+#set a CMake variable to name the library
+SET(cllib integrate)
+ADD_LIBRARY(${cllib} ${LIBCXXFILES})
+
+
+#create the executable
+SET(EXEC integrate.x)
+ADD_EXECUTABLE(${EXEC} main.cpp)
+
+TARGET_LINK_LIBRARIES (${EXEC}
+   ${cllib}
+   ${OPENCL_LIBRARIES}
+)

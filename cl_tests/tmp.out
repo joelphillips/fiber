@@ -1,0 +1,65 @@
+typedef struct {
+ float x,y,z;
+} Point3;
+typedef struct {
+ Point3 first, second;
+} Point3Pair;
+typedef struct {
+ Point3 p1,p2,p3;
+} Point3Triple;
+typedef struct {
+    int idx[3];
+} Triangle;
+typedef struct {
+ int order;
+ float *coeffs;
+} PolyData;
+__kernel void clIntegratePairs (
+    __global const Point3 *g_meshvtx,
+    int nmeshvtx,
+    __global const Triangle *g_meshels,
+    int nmeshels,
+    __global const int *g_tri1,
+    __global const int *g_tri2,
+    int ntri,
+    __global const Point3 *g_refpt1,
+    __global const Point3 *g_refpt2,
+    __global const float *g_weight,
+    int nquad,
+    __global const float *g_basisf,
+    __global float *g_val
+    )
+{
+    int i, qpt;
+    int el = get_global_id(0);
+    if (el >= ntri) return;
+    Point3 vtx1[3];
+    Point3 vtx2[3];
+    Point3 refpt1, refpt2;
+    Point3 pt1, pt2;
+    int tri1 = g_tri1[el];
+    int tri2 = g_tri2[el];
+    for (i = 0; i < 3; i++) {
+        vtx1[i] = g_meshvtx[g_meshels[tri1][i]];
+ vtx2[i] = g_meshvtx[g_meshels[tri2][i]];
+    }
+    float d1 = devDetJac (vtx1);
+    float d2 = devDetJac (vtx2);
+    float d12 = d1*d2;
+    float val[3*3];
+    float kval;
+    for (i = 0; i < 9; i++)
+        val[i] = (float)0;
+    for (qpt = 0; qpt < nquad; qpt++) {
+        refpt1 = g_refpt1[qpt];
+ refpt2 = g_refpt2[qpt];
+ devMapPoint (vtx1, &refpt1, &pt1);
+ devMapPoint (vtx2, &refpt2, &pt2);
+ kval = devKerneval (&pt1, &pt2) * d12 * g_weight[qpt];
+ for (i = 0; i < 3; i++)
+     for (j = 0; j < 3; j++)
+         val[j + i*3] += kval * g_basisf[j + i*3 + qpt*9];
+    }
+    for (i = 0; i < 9; i++)
+        g_val[el*9 + i] = val[i];
+}
