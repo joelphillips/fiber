@@ -5,8 +5,6 @@
  * CL code for integrating and array of element pairs
  */
 
-#include "commontypes.h"
-
 /**
  * \brief Integration kernel
  *

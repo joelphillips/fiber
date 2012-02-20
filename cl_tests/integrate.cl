@@ -1,7 +1,5 @@
 // -*-C++-*-
 
-#include "commontypes.h"
-
 /**
  * \brief Integration kernel
  * \param g_vtx1 Global vertex coordinates for source triangles [ntri1*3]

@@ -1,7 +1,5 @@
 // -*-C++-*-
 
-#include "commontypes.h"
-
 /**
  * \file basisf_lintri.cl
  * OpenCL implementation for shape function computation on a linear

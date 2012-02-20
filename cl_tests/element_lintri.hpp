@@ -7,7 +7,7 @@
 #define __ELEMENT_LINTRI_HPP
 
 #include "element.hpp"
-#include "basisf_lintri.cl.h"
+#include "basisf_lintri.cl.str"
 
 /**
  * \brief Dummy class for a linear triangle type

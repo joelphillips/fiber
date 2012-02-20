@@ -6,8 +6,6 @@
  * index pairs.
  */
 
-#include "commontypes.h"
-
 /**
  * \brief Integration kernel
  * 
@@ -41,13 +39,15 @@ __kernel void clIntegrateBlock (
     __global const int *g_tri2,
     int ntri2,
     __global const Point3 *g_refpt1,
+    __global const FLOAT  *g_weight1,
+    int nquad1,
     __global const Point3 *g_refpt2,
-    __global const FLOAT *g_weight,
-    int nquad,
+    __global const FLOAT *g_weight2,
+    int nquad2,
     __global const FLOAT *g_basisf,
     __global FLOAT *g_val)
 {
-    int i, j, n, el1, el2, qpt;
+  int i, j, n, el1, el2, qpt1, qpt2;
 
     el1 = get_global_id(0);    // index source triangle
     el2 = get_global_id(1);    // index target triangle
@@ -82,19 +82,21 @@ __kernel void clIntegrateBlock (
     for (i = 0; i < 3*3; i++)
         val[i] = 0.0f;
 
-    for (qpt = 0; qpt < nquad; qpt++) {
-        refpt1 = g_refpt1[qpt];
-	refpt2 = g_refpt2[qpt];
-
-	// map points from reference to global coordinates
+    for (qpt1 = 0; qpt1 < nquad1; qpt1++) {
+        refpt1 = g_refpt1[qpt1];
 	devMapPoint (vtx1, &refpt1, &pt1);
-	devMapPoint (vtx2, &refpt2, &pt2);
 
-	kval = devKerneval (&pt1, &pt2) * d12 * g_weight[qpt];
+	for (qpt2 = 0; qpt2 < nquad2; qpt2++) {
+	    refpt2 = g_refpt2[qpt2];
+	    devMapPoint (vtx2, &refpt2, &pt2);
 
-	for (i = 0; i < 3; i++) {
-	    for (j = 0; j < 3; j++) {
-	        val[j + i*3] += kval * g_basisf[j + i*3 + qpt*3*3];
+	    kval = devKerneval (&pt1, &pt2) * d12 *
+	        g_weight1[qpt1] * g_weight2[qpt2];
+
+	    for (i = 0; i < 3; i++) {
+	        for (j = 0; j < 3; j++) {
+		    val[j + i*3] += kval * g_basisf[j + i*3 + qpt1*3*3];
+		}
 	    }
 	}
     }

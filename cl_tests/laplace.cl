@@ -5,8 +5,6 @@
  * OpenCL implementation for Laplace kernel evaluation
  */
 
-#include "commontypes.h"
-
 /**
  * \brief Simple Laplace kernel
  * \param pt1 First point in global coordinates

@@ -7,7 +7,7 @@
 #define __KERNEL_LAPLACE_HPP
 
 #include "kernel.hpp"
-#include "laplace.cl.h"
+#include "laplace.cl.str"
 
 /**
  * \brief Dummy Laplace kernel class

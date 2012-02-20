@@ -7,7 +7,7 @@
 #define __MAP_AFFINEBARYCENTRIC
 
 #include "map.hpp"
-#include "map_affinebary.cl.h"
+#include "map_affinebary.cl.str"
 
 /**
  * \brief Dummy class for an affine barycentric mapper

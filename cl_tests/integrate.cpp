@@ -170,21 +170,14 @@ void CL::runKernel_integratePairs (const int *tri1, const int *tri2, int ntri, F
         printf("ERROR: %s(%d)\n", er.what(), er.err());
     }
 
-    FLOAT *weight = new FLOAT[np];  // obtain this from the quadrature class!
-
-    for (int i = 0; i < np; i++)
-        weight[i] = 1.0;
-
     // Allocate device buffers
     cl_tri1 = cl::Buffer (context, CL_MEM_READ_ONLY, sizeof(int)*ntri, NULL, &err);
     cl_tri2 = cl::Buffer (context, CL_MEM_READ_ONLY, sizeof(int)*ntri, NULL, &err);
-    cl_weight = cl::Buffer (context, CL_MEM_READ_ONLY, sizeof(FLOAT)*np, NULL, &err);
     cl_integral = cl::Buffer (context, CL_MEM_WRITE_ONLY, sizeof(FLOAT)*ntri*9, NULL, &err);
 
     // Copy data to device
     err = queue.enqueueWriteBuffer (cl_tri1, CL_TRUE, 0, sizeof(int)*ntri, tri1, NULL, &event);
     err = queue.enqueueWriteBuffer (cl_tri2, CL_TRUE, 0, sizeof(int)*ntri, tri2, NULL, &event);
-    err = queue.enqueueWriteBuffer (cl_weight, CL_TRUE, 0, sizeof(FLOAT)*np, weight, NULL, &event);
 
     // Set kernel arguments
     err = kernel.setArg ( 0, cl_meshvtx);
@@ -212,8 +205,6 @@ void CL::runKernel_integratePairs (const int *tri1, const int *tri2, int ntri, F
     err = queue.enqueueReadBuffer(cl_integral, CL_TRUE, 0, sizeof(FLOAT)*ntri*9, res,
 					  NULL, &event);
     printf("clEnqueueReadBuffer: %s\n", oclErrorString(err));
-
-    delete []weight;
 }
 
 void CL::runKernel_integrateBlock (const int *triy, int ntriy, const int *trix, int ntrix,
@@ -271,11 +262,13 @@ void CL::runKernel_integrateBlock (const int *triy, int ntriy, const int *trix, 
 	    err = kernel.setArg ( 6, cl_tri2);
 	    err = kernel.setArg ( 7, nbufx);
 	    err = kernel.setArg ( 8, cl_refpt1);
-	    err = kernel.setArg ( 9, cl_refpt2);
-	    err = kernel.setArg (10, cl_weight);
-	    err = kernel.setArg (11, np);
-	    err = kernel.setArg (12, cl_bfprod);
-	    err = kernel.setArg (13, cl_integral);
+	    err = kernel.setArg ( 9, cl_weight);
+	    err = kernel.setArg (10, np);
+	    err = kernel.setArg (11, cl_refpt2);
+	    err = kernel.setArg (12, cl_weight);
+	    err = kernel.setArg (13, np);
+	    err = kernel.setArg (14, cl_bfprod);
+	    err = kernel.setArg (15, cl_integral);
 
 	    //Wait for the command queue to finish these commands before proceeding
 	    queue.finish();

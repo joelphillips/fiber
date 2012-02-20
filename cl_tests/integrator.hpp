@@ -6,9 +6,9 @@
 #ifndef __INTEGRATOR_HPP
 #define __INTEGRATOR_HPP
 
-#include "integrate.cl.h"
-#include "integrate_pairs.cl.h"
-#include "integrate_block.cl.h"
+#include "integrate.cl.str"
+#include "integrate_pairs.cl.str"
+#include "integrate_block.cl.str"
 
 /**
  * \brief Dummy integrator class

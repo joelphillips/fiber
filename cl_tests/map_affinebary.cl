@@ -6,8 +6,6 @@
  *    coordinates.
  */
 
-#include "commontypes.h"
-
 /**
  * \brief Affine barycentric map of a point in a triangle
  * \param [in] vtx array of triangle vertices [3]
